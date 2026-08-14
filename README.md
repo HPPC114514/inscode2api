@@ -245,14 +245,12 @@ sign  = HMAC-SHA256(key, canon).hexdigest()
 
 生成的头：
 
-- `X-Tt-Keyid`（注意是 `Keyid` 不是 `Key-Id`）
+- `X-Tt-Keyid`
 - `X-Tt-Ts`（毫秒时间戳）
 - `X-Tt-Nonce`（base64(16 字节随机)）
 - `X-Tt-Sign`（HMAC hex）
 - `X-Tt-Sign-Version: v1`
 - `X-Tt-Device-Id`
-
-签名算法逆向自 InsCode 客户端（Rust/Tauri），核心思路：静态反汇编锁定 HMAC-SHA256 + 毫秒时间戳框架，再通过等长二进制补丁把上游域名重定向到本地明文端口，抓取真实签名请求反推出 canonical 字段顺序。
 
 ---
 
@@ -277,12 +275,6 @@ A：签名密钥（`sign_key`）可能已过期（`taotoken.json` 里有 `expire
 **Q：`/v1/chat/completions` 返回 404（openresty 页面）？**
 A：上游路径必须是 `/api/v1/chat/completions`（带 `/api/v1`），且 host 是 `taotoken.net`。本项目的 `INCODE2API_BASE_URL` 默认已正确，别改成 `api.taotoken.net` + 错误路径组合。
 
-**Q：能同时用多个模型吗？**
-A：能，`/v1/models` 会列出当前账号可见的模型（免费层通常 `deepseek-v4-flash`，也可能有 `qwen3-vl-8b-instruct` 等），逐个用 `model` 字段切换即可。
-
-**Q：为什么回复里 `content` 是空的、`reasoning_content` 有内容？**
-A：`deepseek-v4-flash` 是推理模型，`reasoning_content` 是思考过程，`content` 是最终答案。`max_tokens` 太小会被推理过程占满，调大一点即可。
-
 ---
 
 ## 免责声明
@@ -292,3 +284,6 @@ A：`deepseek-v4-flash` 是推理模型，`reasoning_content` 是思考过程，
 ## 许可
 
 [Mozilla Public License 2.0](./LICENSE)
+
+
+*Co-Authored-By Kimi-k3 GLM-5.2 Deepseek-v4-pro-0813 Deepseek-v4-flash-0731 On ZCode*
