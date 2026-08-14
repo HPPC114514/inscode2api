@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# 逆向研究 / 扫描历史（不入库）
+.mimosa/
+
+# 本地凭据与临时文件
+*.log
+.env
