@@ -33,15 +33,18 @@
 - ✅ `/v1/models` 返回 OpenAI 格式模型列表
 - ✅ 自动加载本机 InsCode 凭据，无需手动填密钥
 - ✅ 零依赖，复制即用
+- ✅ **提供 Docker 镜像**（Alpine 基础镜像，配置目录路径挂载持久化）
 
 ## 前置条件
 
 1. **已在本机安装并登录过 InsCode 客户端**（产生 `~/.config/inscode/` 下的凭据文件）。
    - Windows 路径：`C:\Users\<你的用户名>\.config\inscode\`
    - macOS / Linux 路径：`~/.config/inscode/`
-2. **Python 3.10+**（本项目在 3.14 验证通过）。
+2. **Python 3.10+**（本项目在 3.14 验证通过）—— 或使用 Docker（见下）。
 
 ## 快速开始
+
+### 方式 A：直接跑 Python（本机）
 
 ```bash
 # 1. 进入项目目录
@@ -64,6 +67,50 @@ python server.py
 curl http://127.0.0.1:8000/healthz
 # {"status": "ok", "service": "inscode2api"}
 ```
+
+### 方式 B：Docker（Alpine 镜像，推荐用于常驻服务）
+
+**1. 构建镜像：**
+
+```bash
+docker build -t inscode2api .
+```
+
+**2. 运行容器**（把 `<InsCode 配置目录>` 换成你本机桌面端 InsCode 生成的配置目录）：
+
+- **Windows**（WSL2 / Docker Desktop）：`/mnt/c/Users/<你的用户名>/.config/inscode`
+- **macOS / Linux**：`/home/<你的用户名>/.config/inscode` 或 `~/.config/inscode`
+
+```bash
+docker run -d --name inscode2api \
+  -p 8000:8000 \
+  -v <InsCode 配置目录>:/data/inscode \
+  inscode2api
+```
+
+> 关键点：
+> - 镜像内置 `INCODE2API_CONFIG_DIR=/data/inscode`，挂载的目录就是容器读取凭据（`taotoken.json` / `device.json` / `auth.json`）的位置；
+> - 容器内监听 `0.0.0.0:8000`（已内置），`-p 8000:8000` 映射到宿主机；
+> - 凭据文件变更（如重新登录 InsCode 刷新了 `sign_key`）无需重建容器，重启容器即可生效：
+>   ```bash
+>   docker restart inscode2api
+>   ```
+
+**3. 用 docker-compose 一键起：**
+
+```bash
+# 先编辑 docker-compose.yml，把 volumes 里的 /mnt/c/Users/hppc/.config/inscode 改成你的路径
+docker compose up -d --build
+```
+
+**4. 验证容器：**
+
+```bash
+curl http://127.0.0.1:8000/healthz     # {"status":"ok","service":"inscode2api"}
+curl http://127.0.0.1:8000/v1/models   # OpenAI 格式模型列表
+```
+
+> 镜像内置 `HEALTHCHECK`（每 30s 探测 `/healthz`），`docker ps` 显示 `(healthy)` 即服务正常。
 
 ---
 
