@@ -291,4 +291,4 @@ A：`deepseek-v4-flash` 是推理模型，`reasoning_content` 是思考过程，
 
 ## 许可
 
-MIT License
+[Mozilla Public License 2.0](./LICENSE)
