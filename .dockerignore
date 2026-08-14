@@ -1,0 +1,11 @@
+# 构建上下文排除项（不进镜像）
+.git
+.mimosa
+__pycache__
+*.pyc
+*.log
+.env
+Dockerfile
+docker-compose.yml
+README.md
+LICENSE

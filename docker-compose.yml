@@ -1,0 +1,33 @@
+# inscode2api 一键编排
+#
+# 用法：
+#   docker compose up -d --build
+#
+# 持久化存储：把桌面端 InsCode 生成的配置目录挂载为 /data/inscode
+#   Windows 示例：/mnt/c/Users/<你的用户名>/.config/inscode
+#   Linux  示例：/home/<你的用户名>/.config/inscode
+# 首次使用请把下方 volumes 里的主机路径改成你自己的。
+
+services:
+  inscode2api:
+    build: .
+    image: inscode2api:latest
+    container_name: inscode2api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      # 若需覆盖凭据 / 代理等，在这里加，例如：
+      # - INCODE2API_PROXY=http://host.docker.internal:7890
+      INCODE2API_CONFIG_DIR: /data/inscode
+      INCODE2API_HOST: 0.0.0.0
+      INCODE2API_PORT: 8000
+    volumes:
+      # ↓↓↓ 改成你本机 InsCode 的配置目录（桌面端生成的 taotoken.json / device.json / auth.json）
+      - /mnt/c/Users/hppc/.config/inscode:/data/inscode
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3).status==200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
